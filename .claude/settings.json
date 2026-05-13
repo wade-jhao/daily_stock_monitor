@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__claude_ai_Slack__slack_send_message",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/validate-report.py"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "WebSearch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/search-counter.py"
+          }
+        ]
+      }
+    ]
+  }
+}
