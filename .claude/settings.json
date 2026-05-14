@@ -19,15 +19,13 @@
             "command": "python3 .claude/hooks/validate-report.py"
           }
         ]
-      }
-    ],
-    "PostToolUse": [
+      },
       {
         "matcher": "WebSearch",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/search-counter.py"
+            "command": "python3 .claude/hooks/search-guard.py"
           }
         ]
       }
