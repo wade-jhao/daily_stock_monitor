@@ -44,6 +44,8 @@
 3. 禁止模糊數字於關鍵位
 4. 禁止自行計算匯率
 5. 台股代碼必須對照代碼表（群聯=8299）
+6. 禁止同一數據在不同訊息中出現不同數字
+7. 禁止寫「昨收未取得」—— 必須從搜尋中取得具體價格
 
 ═══════════════════════════════════════
 【執行時間硬限制】
@@ -61,15 +63,19 @@
 
 【第 1 步：搜尋（9 次硬上限）】
 
-Search 1：「美股期貨即時 道瓊 那指 費半」→ Investing.com 期貨
-Search 2：「NVDA TSLA pre-market news today」→ 核心持倉盤前
-Search 3：「QQQ VOO pre-market S&P 500」→ ETF 盤前
-Search 4：「AAPL MSFT GOOGL AMZN META stock news」→ MAG 7
-Search 5：「TSM AMD AVGO ASML SMCI LRCX semiconductor news」→ 半導體
-Search 6：「US economic data Fed speech tonight schedule」→ 今晚事件
-Search 7：「APP PLTR CRWD AI software stock news」→ AI 軟體/廣告
-Search 8：「GEV VST CEG nuclear energy AI data center」→ 核能/電力
-Search 9（optional）：機構觀點/深度補充
+Search 1：「US stock futures Dow Nasdaq S&P semiconductor index」→ Investing.com 期貨 + 殖利率 + DXY + VIX
+Search 2：「NVDA TSLA stock price pre-market today」→ 核心持倉盤前報價（必須取得具體價格）
+Search 3：「QQQ VOO AAPL MSFT GOOGL AMZN META stock price close」→ ETF + MAG 7 收盤/盤前價
+Search 4：「TSM ADR AMD AVGO ASML MU INTC QCOM SMCI stock price」→ 半導體個股報價
+Search 5：「US economic data Fed speech tonight schedule」→ 今晚事件
+Search 6：「APP PLTR CRWD AI software stock news」→ AI 軟體/廣告
+Search 7：「GEV VST CEG nuclear energy AI data center」→ 核能/電力
+Search 8：「stock analyst upgrade downgrade today」→ 機構觀點
+Search 9（optional）：深度補充
+
+⚠️ Search 2-4 的核心目的是取得個股「具體價格」。若搜尋結果未包含價格，
+必須從 Yahoo Finance 或 Investing.com 的搜尋摘要中擷取。
+禁止在報告中寫「昨收未取得」—— 如果真的無法取得，用前一日已知收盤價。
 
 優先來源：investing.com、cnbc.com、yahoo finance、
 bloomberg.com、marketwatch.com、seekingalpha.com、
