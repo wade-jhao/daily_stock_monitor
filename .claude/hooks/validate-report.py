@@ -16,10 +16,14 @@ def validate_message(message: str) -> list[str]:
 
     # 1. Stock code validation: 群聯 must be 8299, not 8046
     if "群聯" in message:
-        # Check if 群聯 appears near 8046 (wrong code)
         pattern = r"群聯[^)]*\(8046\)|群聯[^)]*8046"
         if re.search(pattern, message):
             issues.append("群聯代碼錯誤：使用了 8046（南電），應為 8299")
+    # 1b. Reverse check: 南電 must be 8046, not 8299
+    if "南電" in message:
+        pattern = r"南電[^)]*\(8299\)|南電[^)]*8299"
+        if re.search(pattern, message):
+            issues.append("南電代碼錯誤：使用了 8299（群聯），應為 8046")
 
     # 2. Fuzzy number detection in critical data positions
     fuzzy_patterns = [
@@ -34,6 +38,27 @@ def validate_message(message: str) -> list[str]:
     for pattern, desc in fuzzy_patterns:
         if re.search(pattern, message):
             issues.append(f"模糊數字：{desc}")
+
+    # 2b. Fuzzy description words in data contexts
+    fuzzy_word_patterns = [
+        (r"[指數漲跌幅匯率成交][：:][^，。\n]*約\s*\d", "關鍵數據使用「約」"),
+        (r"[指數漲跌幅匯率成交][：:][^，。\n]*大約", "關鍵數據使用「大約」"),
+        (r"\d+\s*[點元億%]\s*左右", "數據使用「左右」"),
+        (r"\d+\s*[點元億%]\s*附近", "數據使用「附近」"),
+        (r"接近\s*\d+\s*[點元億%]", "數據使用「接近」"),
+    ]
+    for pattern, desc in fuzzy_word_patterns:
+        if re.search(pattern, message):
+            issues.append(f"模糊描述：{desc}")
+
+    # 2c. Unfilled template placeholders
+    template_patterns = [
+        (r"YYYY-MM-DD", "未填入日期模板 YYYY-MM-DD"),
+        (r"\[族群\]|\[簡述\]|\[判讀\]|\[事件\]", "未填入方括號模板佔位符"),
+    ]
+    for pattern, desc in template_patterns:
+        if re.search(pattern, message):
+            issues.append(f"模板未填：{desc}")
 
     # 3. Empty shell section detection
     empty_patterns = [
@@ -64,12 +89,19 @@ def validate_message(message: str) -> list[str]:
         issues.append("格式錯誤：使用了 # 標題語法（Slack 不支援）")
     if "<b>" in message or "<br>" in message or "<p>" in message:
         issues.append("格式錯誤：使用了 HTML 標籤")
+    # 5b. Markdown link format (should be Slack format <URL|text>)
+    if re.search(r"\[.+?\]\(https?://.+?\)", message):
+        issues.append("格式錯誤：使用了 Markdown 連結 [text](url)（應用 <url|text>）")
 
     # 6. Self-calculated exchange rate detection
     if "換算" in message and "匯率" in message:
         issues.append("匯率可能為自行推算（偵測到「換算」+「匯率」）")
     if "ADR" in message and "反推" in message:
         issues.append("匯率可能用 ADR 反推（禁止行為）")
+
+    # 7. Message length check (Slack limit ~4000, our target 3500)
+    if len(message) > 3500:
+        issues.append(f"訊息過長：{len(message)} 字（上限 3500）")
 
     return issues
 

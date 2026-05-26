@@ -37,6 +37,15 @@
             "command": "python3 .claude/hooks/search-guard.py"
           }
         ]
+      },
+      {
+        "matcher": "WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/block-domains.py"
+          }
+        ]
       }
     ],
     "Stop": [
