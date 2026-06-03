@@ -10,8 +10,8 @@ The system consists of 4 Claude Code routines (remote triggers) that run on sche
 | Routine | Schedule (UTC) | Taiwan Time | Frequency |
 |---------|---------------|-------------|-----------|
 | 台股盤前摘要 | `30 0 * * 1-5` | ~08:30 Mon-Fri | Daily |
-| 台股盤後深度 | `30 9 * * 1-5` | ~17:30 Mon-Fri | Daily |
-| 美股盤前實戰 | `0 11 * * 1,3` | ~19:00 Mon+Wed | Bi-weekly |
+| 台股盤後深度 | `30 10 * * 1-5` | ~18:30 Mon-Fri | Daily |
+| 美股盤前實戰 | `30 11 * * 1,3,5` | ~19:30 Mon+Wed+Fri | Tri-weekly |
 | AI Weekly Review | `0 1 * * 1` | ~09:00 Mon | Weekly |
 
 Output: 3 Slack messages per stock report, 1 message for AI weekly review.
