@@ -25,6 +25,16 @@
 ## Hooks 自動執行
 
 - SessionStart：重置搜尋計數器
-- PreToolUse (Slack send)：品質門檻檢查（代碼、格式、模糊數字）
-- PostToolUse (WebSearch)：搜尋次數追蹤與警告
+- PreToolUse (Slack send)：品質門檻檢查 — 🔴 硬門檻擋發送（代碼/模糊數字/模板）、🟡 軟門檻警告放行（格式/空殼/超長）
+- PreToolUse (WebSearch)：搜尋次數追蹤與警告
+- PreToolUse (WebFetch)：封鎖網域攔截
 - Stop：記錄執行 log
+
+## 跨 Routine 記憶層（Step 0.3）
+
+每個 routine 開頭透過 slack_read_channel 讀取前次報告作為 context：
+- 盤前 ← 前日盤後 + 美股（limit=12）
+- 盤後 ← 今日盤前（limit=6）
+- 美股 ← 今日盤後（limit=6）
+
+讀取失敗不阻斷，透過標題前綴識別報告（「台股摘要」「台股盤後深度」「美股盤前實戰」）。

@@ -18,6 +18,25 @@ Output: 3 Slack messages per stock report, 1 message for AI weekly review.
 Channel: C0B0B2K8857 (#daily_wade_monitor)
 Slack Connector UUID: 8afb2353-9fc1-446d-8c36-da276557abdf
 
+## Harness 架構（Memory / Orchestration / Governance）
+
+### Cross-routine Memory（Step 0.3）
+每個 routine 執行時先讀取 Slack 頻道歷史訊息，取得前次報告 context：
+- 台股盤前 ← 前日盤後 + 美股盤前（limit=12）
+- 台股盤後 ← 今日盤前（limit=6）
+- 美股盤前 ← 今日盤後（limit=6）
+
+Slack read 不計入搜尋次數或執行時間。讀取失敗時 graceful fallback，不阻斷流程。
+
+### Cross-routine Orchestration
+- 盤後報告含「盤前預判 vs 實際結果」段落
+- 美股報告含「今日台股回顧 + 台股→美股連結」段落
+- 盤前報告含「前日脈絡 + 隔夜美股」2 行 context
+
+### Quality Governance（兩層防線）
+第一層（Prompt 內建）：Ground Truth 登記表 — WebFetch 數據為 ground truth，硬門檻阻斷不合格訊息
+第二層（Hook 自動攔截）：validate-report.py — 🔴 Hard（代碼/模糊數字/模板）deny + 🟡 Soft（格式/空殼）allow with warning
+
 ## Known Blocked URLs (HTTP 403 - DO NOT attempt WebFetch)
 
 These URLs consistently return 403 errors. Do NOT waste search quota on them:
