@@ -16,11 +16,20 @@
 可用：cnyes.com、ctee.com.tw、money.udn.com、investing.com、moneydj.com、tw.stock.yahoo.com、cmoney.tw
 禁用：twse.com.tw、goodinfo.tw、histock.tw、sinotrade.com.tw、wantgoo.com
 
-## Skills 參考
+## Skills 參考（.claude/skills/）
 
-- `stock-analysis`：量價四型態判讀、真強/誘多判別、期現貨組合判讀
-- `supply-chain-map`：美股→台股完整供應鏈傳導對照
-- `data-quality-check`：發送前品質檢查流程
+Routine prompt 透過 `⟹ 讀取 .claude/skills/xxx.md` 引用 skill，不內嵌內容。
+
+| Skill | 用途 | 引用者 |
+|-------|------|--------|
+| `stock-analysis` | 量價四型態、真強/誘多、期現貨組合判讀 | 盤後 |
+| `supply-chain-map` | 美股→台股傳導對照表 | 美股 |
+| `stock-code-table` | 完整股票代碼表（群聯=8299） | 全部 |
+| `ground-truth-tw` | 台股 GT 登記表 + 硬/軟門檻 | 盤前、盤後 |
+| `ground-truth-us` | 美股 GT 登記表（期貨/個股） | 美股 |
+| `quality-gate-tw` | 台股兩層品質門檻 | 盤前、盤後 |
+| `quality-gate-us` | 美股兩層品質門檻 | 美股 |
+| `data-quality-check` | 品質檢查框架（兩層制） | Hook 參考 |
 
 ## Hooks 自動執行
 
