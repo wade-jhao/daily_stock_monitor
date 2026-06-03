@@ -107,10 +107,10 @@ WebFetch 4：`https://www.investing.com/equities/tesla-motors`
 
 Search 1：「US stock market today S&P Nasdaq semiconductor VIX DXY」→ 總經變數 + 殖利率 + 費半（期貨已由第 0.5 步取得，本次聚焦分析面）
 Search 2：「QQQ VOO AAPL MSFT GOOGL AMZN META stock price today」→ ETF + MAG 7 報價（NVDA/TSLA 已由第 0.5 步取得）
-Search 3：「TSM ADR AMD AVGO ASML MU INTC QCOM SMCI stock price」→ 半導體個股報價
+Search 3：「TSM ADR AMD AVGO MRVL ARM MU ASML INTC QCOM SMCI stock price」→ 半導體+ASIC 個股報價
 Search 4：「US economic data Fed speech tonight schedule」→ 今晚事件
-Search 5：「APP PLTR CRWD AI software stock news」→ AI 軟體/廣告
-Search 6：「GEV VST CEG nuclear energy AI data center」→ 核能/電力
+Search 5：「APP PLTR CRWD DELL ANET AI infrastructure stock news」→ AI 軟體+基礎設施
+Search 6：「GEV VST CEG VRT nuclear energy AI data center power」→ 核能/電力/散熱
 Search 7：「stock analyst upgrade downgrade today」→ 機構觀點
 Search 8：「US stock market analysis pre-market movers today」→ 盤前異動 + 深度分析
 Search 9（optional）：深度補充
@@ -221,17 +221,36 @@ _下一則：MAG 7 + 半導體 + 台股傳導_
 🔧 *AVGO*：±X.XX% ($XXX)
 - 台股影響：台積電先進製程、PCB/載板
 
-🔧 *ASML*：±X.XX% (€XXX)
 🔧 *INTC*：±X.XX% ($XX)
 🔧 *QCOM*：±X.XX% ($XXX)
 🔧 *MU*：±X.XX% ($XXX)
 - 台股連動：南亞科(2408)/群聯(8299)
 
+🔧 *MRVL* 🔥：±X.XX% ($XXX)
+- 動向：[客製ASIC/矽光子CPO/Teralynx交換器/NVLink Fusion]
+- 台股連動：聯亞(3081)/聯鈞(3450)/上詮(3363)/日月光(3711)/智邦(2345)
+
+🔧 *ARM*：±X.XX% ($XXX)
+- 動向：[IP授權/Neoverse/AI PC RTX Spark] | 台股連動：世芯-KY(3661)/創意(3443)/智原(3035)
+
 🔧 *SMCI*：±X.XX% ($XX)
 - 動向：[AI 伺服器組裝] | 台股連動：散熱/電源鏈
 
 *━━ 半導體設備/EDA（有動態時列出）━━*
-LRCX、KLAC、CDNS、ADI 等有顯著動態時簡述
+LRCX、KLAC、CDNS、ASML、ADI 等有顯著動態時簡述
+
+*━━ AI 基礎設施/伺服器品牌 ━━*
+
+🖥️ *DELL*：±X.XX% ($XXX)
+- 動向：[AI 伺服器出貨/PowerEdge] | 台股連動：鴻海(2317)/廣達(2382)/緯穎(6669)
+
+🖥️ *HPE*：±X.XX% ($XX)
+- 動向：[ProLiant/網路設備] | 台股連動：緯創(3231)/英業達(2356)
+
+🌐 *ANET (Arista)*：±X.XX% ($XXX)
+- 動向：[AI 資料中心網路/400G-800G 交換器] | 台股連動：智邦(2345)
+
+（僅列出有顯著動態的個股，無動態可整段省略）
 
 *━━ AI 軟體/廣告平台 ━━*
 
@@ -262,6 +281,9 @@ LRCX、KLAC、CDNS、ADI 等有顯著動態時簡述
 
 ⚡ *OKLO*：±X.XX% ($XX)
 - 動向：[SMR 小型核反應堆/NRC 審核/Sam Altman]
+
+⚡ *VRT (Vertiv)*：±X.XX% ($XXX)
+- 動向：[資料中心液冷/電源管理/AI 散熱] | 台股連動：雙鴻(3324)/奇鋐(3017)/高力(8996)
 
 （僅列出有顯著動態的個股，無動態可整段省略）
 
