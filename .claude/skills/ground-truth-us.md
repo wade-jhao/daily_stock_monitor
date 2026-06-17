@@ -7,13 +7,13 @@ description: 美股 routine 的 Ground Truth 驗證框架。期貨和核心個�
 
 ## GT 登記表
 
-第 0.5 步 WebFetch 取得的數據為 ground truth。撰寫每則訊息前，
-必須建立內部「GT 登記表」並逐項比對：
+第 0.5 步的硬數據為 ground truth（期貨/個股報價由 WebSearch 結果摘要擷取並跨搜尋交叉確認，
+禁止 WebFetch investing.com）。撰寫每則訊息前，必須建立內部「GT 登記表」並逐項比對：
 
-- GT_FUTURES_DOW：道瓊期貨 = [第 0.5 步數字]
-- GT_FUTURES_NQ：那指期貨 = [第 0.5 步數字]
-- GT_NVDA：NVDA 盤前價 = [第 0.5 步數字]
-- GT_TSLA：TSLA 盤前價 = [第 0.5 步數字]
+- GT_FUTURES_DOW：道瓊期貨 = [Search 1 摘要]
+- GT_FUTURES_NQ：那指期貨 = [Search 1 摘要]
+- GT_NVDA：NVDA 盤前價 = [Search 2 摘要]
+- GT_TSLA：TSLA 盤前價 = [Search 2 摘要]
 
 ## 🔴 硬門檻（任一不過 → 該則訊息禁止發送，改發品質警告）
 

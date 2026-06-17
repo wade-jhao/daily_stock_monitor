@@ -13,7 +13,8 @@
 
 ## 資料來源優先順序
 
-可用：cnyes.com、ctee.com.tw、money.udn.com、investing.com、moneydj.com、tw.stock.yahoo.com、cmoney.tw
+可用（WebFetch）：cnyes.com、ctee.com.tw、money.udn.com、moneydj.com、tw.stock.yahoo.com、cmoney.tw
+僅搜尋取數（勿 WebFetch，常 403）：investing.com — 匯率、美股期貨、美股個股報價一律用 WebSearch 讀結果摘要（讀摘要≠自算匯率，合法）
 禁用：twse.com.tw、goodinfo.tw、histock.tw、sinotrade.com.tw、wantgoo.com
 
 ## Skills 參考（.claude/skills/）
@@ -27,9 +28,8 @@ Routine prompt 透過 `⟹ 讀取 .claude/skills/xxx.md` 引用 skill，不內�
 | `stock-code-table` | 完整股票代碼表（群聯=8299） | 全部 |
 | `ground-truth-tw` | 台股 GT 登記表 + 硬/軟門檻 | 盤前、盤後 |
 | `ground-truth-us` | 美股 GT 登記表（期貨/個股） | 美股 |
-| `quality-gate-tw` | 台股兩層品質門檻 | 盤前、盤後 |
-| `quality-gate-us` | 美股兩層品質門檻 | 美股 |
-| `data-quality-check` | 品質檢查框架（兩層制） | Hook 參考 |
+| `quality-gate-tw` | 台股發送前品質門檻（代碼/格式/合規/長度/搜尋；數值門檻見 ground-truth-tw） | 盤前、盤後 |
+| `quality-gate-us` | 美股發送前品質門檻（數值門檻見 ground-truth-us） | 美股 |
 
 ## Hooks 自動執行
 

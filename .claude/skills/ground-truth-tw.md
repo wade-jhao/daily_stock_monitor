@@ -7,12 +7,12 @@ description: 台股 routine（盤前/盤後）的 Ground Truth 驗證框架。We
 
 ## GT 登記表
 
-第 0.5 步 WebFetch 取得的數據為 ground truth。撰寫每則訊息前，
-必須建立內部「GT 登記表」並逐項比對：
+第 0.5 步取得的硬數據為 ground truth（指數優先 cnyes WebFetch；匯率改由 WebSearch 結果摘要擷取，
+禁止 WebFetch investing.com）。撰寫每則訊息前，必須建立內部「GT 登記表」並逐項比對：
 
-- GT_INDEX：加權指數收盤 = [第 0.5 步數字]
-- GT_CHANGE：漲跌幅 = [第 0.5 步數字]
-- GT_FX：USD/TWD = [第 0.5 步數字]
+- GT_INDEX：加權指數收盤 = [cnyes WebFetch 或搜尋摘要]
+- GT_CHANGE：漲跌幅 = [同上]
+- GT_FX：USD/TWD = [WebSearch 摘要擷取，非 ADR 反推]
 - GT_DATE：數據日期 = [第 0.5 步日期]
 
 ## 🔴 硬門檻（任一不過 → 該則訊息禁止發送，改發品質警告）

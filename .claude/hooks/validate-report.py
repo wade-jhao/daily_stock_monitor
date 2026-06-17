@@ -72,6 +72,18 @@ def validate_message(message: str) -> tuple[list[str], list[str]]:
         if pat in message:
             soft.append(f"空殼區段：包含「{pat}」")
 
+    # 3b. Over-apologizing: too many "未取得/未能取得" disclaimers [SOFT]
+    na_count = message.count("未取得") + message.count("未能取得")
+    if na_count > 3:
+        soft.append(
+            f"過多缺口標註：「未取得/未能取得」出現 {na_count} 次"
+            "（建議省略空區段，僅在結尾用 1 行彙整關鍵缺口）"
+        )
+
+    # 3c. Duplicated send trailer (inflates length) [SOFT]
+    if message.count("已透過以下方式傳送") > 1:
+        soft.append("傳送 trailer 重複出現（建議去重，避免訊息超長）")
+
     # 4. Banned investment advice language [SOFT]
     advice_patterns = [
         "建議買進",

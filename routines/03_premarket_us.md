@@ -50,25 +50,18 @@
 
 【第 0 步】執行 Bash 指令 `TZ=Asia/Taipei date '+%Y-%m-%d %H:%M %A'` 取得精確台灣時間與日期。
 
-【第 0.5 步：WebFetch 硬數據（期貨、核心個股）— 不計入搜尋次數】
+【第 0.5 步：硬數據取得（期貨、核心個股）— 用搜尋摘要，不 WebFetch】
 
-此步驟取得的數據為 ground truth，後續搜尋結果若與此矛盾，以此為準。
-19:30 台灣時間 = 美東約 07:30，盤前交易已開始，以下頁面可取得即時報價。
+⚠️ investing.com WebFetch 常回傳 403，禁止對其 WebFetch。期貨與美股個股報價一律改用 WebSearch
+   從結果摘要直接擷取（精確值通常直接出現，如 S&P 期貨 7,623.5、NVDA 盤前價）。
+   ✅ 讀搜尋摘要＝合法取數。此步驟的數值經跨搜尋交叉確認後即為 ground truth。
 
-WebFetch 1：`https://www.investing.com/indices/us-30-futures`
-→ 擷取：道瓊期貨價格、漲跌幅；頁面上亦可見 S&P 500 期貨數據
+此步驟的硬數據併入第 1 步前兩次搜尋取得，不另計次數：
+- 道瓊/標普/那指期貨 → 由 Search 1 摘要擷取
+- NVDA、TSLA 盤前價與漲跌幅 → 由 Search 2 摘要擷取
 
-WebFetch 2：`https://www.investing.com/indices/nq-100-futures`
-→ 擷取：那斯達克 100 期貨價格、漲跌幅
-
-WebFetch 3：`https://www.investing.com/equities/nvidia-corp`
-→ 擷取：NVDA 盤前價格、前收盤價、漲跌幅、日範圍
-
-WebFetch 4：`https://www.investing.com/equities/tesla-motors`
-→ 擷取：TSLA 盤前價格、前收盤價、漲跌幅、日範圍
-
-⚠️ 若任一 WebFetch 失敗，改用搜尋補足（從 Search 1-2 額度中分配）。
-⚠️ WebFetch 取得的價格為 ground truth。後續搜尋若出現不同數字，以 WebFetch 為準。
+19:30 台灣時間 = 美東約 07:30，盤前交易已開始，上述報價可取得。
+後續搜尋若出現不同數字，以最先取得且跨來源一致者為準。
 
 【第 0.3 步：讀取今日台股盤後報告（記憶層）— 不計入搜尋次數或執行時間】
 
@@ -89,27 +82,28 @@ WebFetch 4：`https://www.investing.com/equities/tesla-motors`
 ⚠️ 容錯規則：
 - 讀取失敗或找不到今日盤後報告 → 跳過，第 3 則維持獨立分析
 - 識別方式：今日日期 + 標題「台股盤後深度」前綴
+- 記憶層（台股收盤）僅作脈絡引用；美股期貨/個股等數值一律以當日搜尋為準，不得用記憶層舊值覆蓋
 
 ═══════════════════════════════════════
 【Ground Truth 驗證指令】
 ⟹ 讀取 .claude/skills/ground-truth-us.md 並遵循其中的 GT 登記表建立和硬/軟門檻驗證流程。
-   WebFetch 期貨和個股數據為 ground truth。硬門檻未過禁止發送。
+   第 0.5 步硬數據（期貨/個股，WebSearch 摘要取得並跨搜尋交叉確認）為 ground truth。硬門檻未過禁止發送。
 ═══════════════════════════════════════
 
 【第 1 步：搜尋（9 次硬上限）】
 
 ⚠️ 數據日期驗證：搜尋結果中的收盤價、期貨數據等，
-必須與第 0.5 步的 WebFetch 數據交叉比對。若數字不吻合，以第 0.5 步為準。
+必須與第 0.5 步取得的數據交叉比對。若數字不吻合，以第 0.5 步（最先取得且跨來源一致者）為準。
 
 ⚠️ 事件時效校驗：搜尋結果中出現「即將發布」「預計今晚」「upcoming」等未來事件描述時，
 必須交叉確認該事件是否已經發生。已發生的事件應改寫為結果回顧，
 不可照搬預告文當作未來事件報導。
 
-Search 1：「US stock market today S&P Nasdaq semiconductor VIX DXY」→ 總經變數 + 殖利率 + 費半（期貨已由第 0.5 步取得，本次聚焦分析面）
-Search 2：「QQQ VOO AAPL MSFT GOOGL AMZN META stock price today」→ ETF + MAG 7 報價（NVDA/TSLA 已由第 0.5 步取得）
-Search 3：「TSM ADR AMD AVGO MRVL ARM MU ASML INTC QCOM SMCI stock price」→ 半導體+ASIC 個股報價
+Search 1：「S&P Nasdaq Dow futures premarket today VIX DXY 10Y yield」→ 道瓊/標普/那指期貨報價（GT）+ VIX/DXY/10年期殖利率（皆從結果摘要擷取，不 WebFetch）
+Search 2：「NVDA TSLA QQQ AAPL MSFT GOOGL AMZN META premarket stock price today」→ NVDA/TSLA 盤前報價（GT）+ ETF + MAG 7 報價
+Search 3：「TSM ADR AMD AVGO MRVL ARM MU ASML INTC QCOM SMCI CRDO ALAB COHR LITE stock price」→ 半導體+ASIC+AI互連/光通訊 個股報價
 Search 4：「US economic data Fed speech tonight schedule」→ 今晚事件
-Search 5：「APP PLTR CRWD DELL ANET AI infrastructure stock news」→ AI 軟體+基礎設施
+Search 5：「APP PLTR CRWD DELL ANET ORCL CRWV NBIS SPCX AI infrastructure stock news」→ AI 軟體+基礎設施+Neocloud+太空
 Search 6：「GEV VST CEG VRT nuclear energy AI data center power」→ 核能/電力/散熱
 Search 7：「stock analyst upgrade downgrade today」→ 機構觀點
 Search 8：「US stock market analysis pre-market movers today」→ 盤前異動 + 深度分析
@@ -124,8 +118,9 @@ bloomberg.com、marketwatch.com、seekingalpha.com、
 barchart.com（期權）
 
 ═══════════════════════════════════════
-【台股供應鏈對應表】
+【台股供應鏈對應表 + 代碼表】
 ⟹ 讀取 .claude/skills/supply-chain-map.md 取得完整美股→台股傳導對照表。
+⟹ 讀取 .claude/skills/stock-code-table.md 核對台股傳導標的代碼。
    撰寫傳導鏈時查詢此表，每條需包含：美股事件 → 傳導邏輯 → 台股標的。
    ⚠️ 群聯=8299，8046=南電。
 ═══════════════════════════════════════
@@ -236,6 +231,19 @@ _下一則：MAG 7 + 半導體 + 台股傳導_
 🔧 *SMCI*：±X.XX% ($XX)
 - 動向：[AI 伺服器組裝] | 台股連動：散熱/電源鏈
 
+*━━ AI 互連/光通訊（高速連結，🔥當紅主軸）━━*
+
+🔌 *CRDO (Credo)* 🔥：±X.XX% ($XXX)
+- 動向：[SerDes/AEC 主動電纜/GPU 互連，2026 YTD 大幅領先] | 台股連動：連接器 嘉澤(3533)/光通訊 上詮(3363)
+🔌 *ALAB (Astera Labs)* 🔥：±X.XX% ($XXX)
+- 動向：[PCIe/CXL/光互連 retimer/Scorpio fabric switch] | 台股連動：載板 欣興(3037)
+💡 *COHR (Coherent)*：±X.XX% ($XXX)
+- 動向：[雷射/光收發模組/NVDA 入股] | 台股連動：聯亞(3081)/聯鈞(3450)/華星光(4979)
+💡 *LITE (Lumentum)*：±X.XX% ($XXX)
+- 動向：[資料中心雷射/光模組/NVDA 入股] | 台股連動：光通訊/CPO 鏈
+
+（僅列出有顯著動態的個股，無動態可整段省略）
+
 *━━ 半導體設備/EDA（有動態時列出）━━*
 LRCX、KLAC、CDNS、ASML、ADI 等有顯著動態時簡述
 
@@ -249,6 +257,13 @@ LRCX、KLAC、CDNS、ASML、ADI 等有顯著動態時簡述
 
 🌐 *ANET (Arista)*：±X.XX% ($XXX)
 - 動向：[AI 資料中心網路/400G-800G 交換器] | 台股連動：智邦(2345)
+
+☁️ *ORCL (Oracle)* 🔥：±X.XX% ($XXX)
+- 動向：[OCI 雲端/RPO backlog 積壓訂單/FY26 capex] | 台股連動：伺服器代工 鴻海(2317)/廣達(2382)
+⛅ *CRWV (CoreWeave)* 🔥：±X.XX% ($XXX)
+- 動向：[GPU 雲/Neocloud/backlog/電力擴張/Meta 大單] | 台股連動：AI 伺服器/散熱/光通訊鏈
+⛅ *NBIS (Nebius)*：±X.XX% ($XXX)
+- 動向：[GPU 雲/歐洲 Neocloud/營收高成長]
 
 （僅列出有顯著動態的個股，無動態可整段省略）
 
@@ -284,6 +299,13 @@ LRCX、KLAC、CDNS、ASML、ADI 等有顯著動態時簡述
 
 ⚡ *VRT (Vertiv)*：±X.XX% ($XXX)
 - 動向：[資料中心液冷/電源管理/AI 散熱] | 台股連動：雙鴻(3324)/奇鋐(3017)/高力(8996)
+
+（僅列出有顯著動態的個股，無動態可整段省略）
+
+*━━ 太空/低軌衛星（2026 新增）━━*
+
+🛰️ *SPCX (SpaceX)* 🔥：±X.XX% ($XXX)
+- 動向：[2026/6/12 Nasdaq 掛牌、史上最大 IPO（發行價 $135、首日收 $160.95、市值逾 2 兆美元）/Starlink 擴張/Starship] | 台股連動：低軌衛星 昇達科(3491)/華通(2313)/啟碁(6285)/同欣電(6271)/兆赫(2485)/台揚(2314)
 
 （僅列出有顯著動態的個股，無動態可整段省略）
 
