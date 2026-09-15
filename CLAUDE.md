@@ -67,13 +67,16 @@ These URLs consistently return 403 errors. Do NOT waste search quota on them:
 4. Yahoo 股市 tw.stock.yahoo.com
 
 ### 美股/國際數據
-⚠️ 期貨、指數、匯率、美股個股報價一律用 WebSearch 讀結果摘要（搜「S&P Nasdaq futures today」「NVDA premarket」通常直接回傳精確值）。investing.com WebFetch 常 403，勿直接抓頁。
-1. WebSearch 結果摘要（首選：期貨/指數/個股/匯率/原物料）
-2. CNBC、Yahoo Finance、MarketWatch（搜尋摘要中的報價）
+⚠️ 期貨、指數、美股個股報價**首選 WebFetch Yahoo chart API**（⟹ `.claude/skills/data-sources.md`），不計搜尋次數。
+1. Yahoo chart API（首選：`ES=F`/`NQ=F`/`YM=F`/`^SOX`/`^VIX`/`DX-Y.NYB`/個股代號）
+2. 回退：WebSearch 結果摘要（搜「S&P Nasdaq futures today」「NVDA premarket」通常直接回傳精確值）
+3. CNBC、Yahoo Finance、MarketWatch（搜尋摘要中的報價）
+⚠️ investing.com WebFetch 常 403，勿直接抓頁。Yahoo chart 只能用 WebFetch，勿用 Bash/curl（會被限流）。
 
 ### 台幣匯率
-1. WebSearch「台幣匯率」或「USD TWD」→ 從結果摘要擷取即期匯率（讀摘要≠自算匯率，合法）
-2. 鉅亨網外匯頁面（搜尋摘要）
+1. WebFetch Yahoo chart `TWD=X`（首選，不計搜尋次數）
+2. 回退：WebSearch「台幣匯率」或「USD TWD」→ 從結果摘要擷取即期匯率（讀摘要≠自算匯率，合法）
+3. 鉅亨網外匯頁面（搜尋摘要）
 ⚠️ investing.com 匯率頁勿 WebFetch（403）；禁止用 ADR 反推匯率
 
 ### 除權息/法說會

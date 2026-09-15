@@ -7,15 +7,17 @@
 1. **封鎖網域**：twse.com.tw、goodinfo.tw、histock.tw、sinotrade.com.tw、wantgoo.com 永遠回傳 403，禁止 WebFetch
 2. **股票代碼**：群聯=8299（不是 8046），8046=南電。所有代碼必須查表確認
 3. **數據品質**：禁止模糊數字（~、約、X）、禁止自算匯率、禁止編造籌碼
-4. **格式**：Slack mrkdwn 單星號粗體 `*文字*`，禁止雙星號、HTML、# 標題
+4. **格式**：標準 Markdown。粗體 `**文字**`（單星號 `*文字*` 會變斜體）、斜體 `_文字_`、表格可用。禁止 HTML、`#` 標題
 5. **效率**：取不到的數據直接省略，不留空殼佔版面
 6. **定位**：資訊整理，非投資建議。禁止「建議買進/賣出」
 
 ## 資料來源優先順序
 
-可用（WebFetch）：cnyes.com、ctee.com.tw、money.udn.com、moneydj.com、tw.stock.yahoo.com、cmoney.tw
-僅搜尋取數（勿 WebFetch，常 403）：investing.com — 匯率、美股期貨、美股個股報價一律用 WebSearch 讀結果摘要（讀摘要≠自算匯率，合法）
-禁用：twse.com.tw、goodinfo.tw、histock.tw、sinotrade.com.tw、wantgoo.com
+硬數據（WebFetch 固定端點，不計搜尋次數）：⟹ 讀取 `.claude/skills/data-sources.md`
+  指數/匯率/期貨/個股報價走 Yahoo chart API；外資台指期走 taifex.com.tw。**這些端點只能用 WebFetch，不可用 Bash/curl（會被限流擋下）**
+可用（WebFetch）：cnyes.com、ctee.com.tw、money.udn.com、moneydj.com、tw.stock.yahoo.com、cmoney.tw、openapi.twse.com.tw
+回退取數（勿 WebFetch，常 403）：investing.com — 僅在上述端點失效時，才改用 WebSearch 讀結果摘要（讀摘要≠自算匯率，合法）
+禁用：www.twse.com.tw、goodinfo.tw、histock.tw、sinotrade.com.tw、wantgoo.com
 
 ## Skills 參考（.claude/skills/）
 
@@ -26,6 +28,7 @@ Routine prompt 透過 `⟹ 讀取 .claude/skills/xxx.md` 引用 skill，不內�
 | `stock-analysis` | 量價四型態、真強/誘多、期現貨組合判讀 | 盤後 |
 | `supply-chain-map` | 美股→台股傳導對照表 | 美股 |
 | `stock-code-table` | 完整股票代碼表（群聯=8299） | 全部 |
+| `data-sources` | 硬數據固定端點表（Yahoo/TAIFEX）、取數措辭、回退規則 | 全部 |
 | `ground-truth-tw` | 台股 GT 登記表 + 硬/軟門檻 | 盤前、盤後 |
 | `ground-truth-us` | 美股 GT 登記表（期貨/個股） | 美股 |
 | `quality-gate-tw` | 台股發送前品質門檻（代碼/格式/合規/長度/搜尋；數值門檻見 ground-truth-tw） | 盤前、盤後 |

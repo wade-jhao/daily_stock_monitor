@@ -23,16 +23,18 @@ Yahoo chart API 路徑統一為
 | 加權指數 | `https://query1.finance.yahoo.com/v8/finance/chart/%5ETWII?range=5d&interval=1d` | `regularMarketPrice`、`chartPreviousClose` | ✅ 已實測（WebFetch） |
 | USD/TWD | `https://query1.finance.yahoo.com/v8/finance/chart/TWD=X?range=2d&interval=1d` | `regularMarketPrice` | ✅ 已實測（WebFetch） |
 | 外資台指期 | `https://www.taifex.com.tw/cht/3/futContractsDate` | 臺股期貨 → 外資及陸資 → 未平倉多空淨額口數 | ✅ 已實測（curl 200） |
-| 櫃買指數 | `.../chart/%5ETWOII` | 同加權 | ⚠️ 未獨立驗證（見下方限流註記） |
-| 美股期貨 | `.../chart/ES=F`、`NQ=F`、`YM=F` | 同上 | ⚠️ 未獨立驗證 |
-| 費城半導體 | `.../chart/%5ESOX` | 同上 | ⚠️ 未獨立驗證 |
-| VIX / 美元指數 | `.../chart/%5EVIX`、`.../chart/DX-Y.NYB` | 同上 | ⚠️ 未獨立驗證 |
-| 美股個股 | `.../chart/{TICKER}`（NVDA/TSLA/TSM/QQQ/VOO…） | 同上 | ⚠️ 未獨立驗證 |
+| 櫃買指數 | `.../chart/%5ETWOII` | 同加權 | ✅ 已實測（WebFetch，269.45 / 267.72） |
+| 美股期貨 | `.../chart/ES=F`、`NQ=F`、`YM=F` | 同上 | ✅ `ES=F` 已實測（7668.5 / 7625.0）；`NQ=F`/`YM=F` 同類推定 |
+| 費城半導體 | `.../chart/%5ESOX` | 同上 | ✅ 已實測（11131.281 / 11614.17） |
+| VIX / 美元指數 | `.../chart/%5EVIX`、`.../chart/DX-Y.NYB` | 同上 | ✅ `DX-Y.NYB` 已實測（99.59 / 99.46）；`^VIX` 同類推定 |
+| 美股個股 | `.../chart/{TICKER}`（NVDA/TSLA/TSM/QQQ/VOO…） | 同上 | ✅ `NVDA` 已實測（210.96 / 218.36）；其餘同類推定 |
 
 ⚠️ **限流註記（2026-09-15 健康檢查）**：以 `curl` 連續打 Yahoo chart API 會回 **HTTP 429
 （Too Many Requests）**，query1/query2 皆然，換 browser user-agent 亦然；同時
 `https://finance.yahoo.com/quote/%5ETWII/` 回 200。這是對命令列客戶端的 bot 限流，
-不代表端點失效 —— `^TWII`、`TWD=X` 先前經 **WebFetch** 實測可取得數值。
+不代表端點失效 —— 同一批符號改走 **WebFetch** 全數取得正確數值（`^TWII`、`TWD=X`、
+`^TWOII`、`ES=F`、`^SOX`、`DX-Y.NYB`、`NVDA` 七項已逐一驗證，涵蓋台股指數／櫃買／匯率／
+美股期貨／產業指數／美元指數／個股每一類）。
 因此：**Yahoo 端點以 WebFetch 為唯一取數路徑，勿改用 Bash/curl**；
 任一次 WebFetch 失敗或回 `NOT_FOUND`，直接走第 4 節回退規則，不重試、不中斷。
 
