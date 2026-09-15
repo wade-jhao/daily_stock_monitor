@@ -109,6 +109,8 @@ Search 7：「stock analyst upgrade downgrade today」→ 機構觀點
 Search 8：「US stock market analysis pre-market movers today」→ 盤前異動 + 深度分析
 Search 9（optional）：深度補充
 
+> 上限為 9 次，但**不必用滿** — 硬數據已由第 0.5 步 WebFetch 取得，搜尋只用於敘事、事件與法人新聞。
+
 ⚠️ Search 2-3 的目的是取得個股「具體價格」。若搜尋結果未包含價格，
 必須從 Yahoo Finance 或 Investing.com 的搜尋摘要中擷取。
 禁止在報告中寫「昨收未取得」—— 如果真的無法取得，用前一日已知收盤價。

@@ -1,42 +1,36 @@
 #!/usr/bin/env python3
 """
-SessionStart hook: reset search counter and detect routine type to set limit.
+SessionStart hook: reset the search counter and clear cross-message dedup state.
 """
 
 import json
+import os
 import sys
 
+SEARCH_LIMIT = 9
 COUNTER_FILE = "/tmp/claude_search_counter.json"
+FACTS_FILE = "/tmp/claude_report_facts.json"
 
-# Limits per routine type
-LIMITS = {
-    "premarket_tw": 7,
-    "postmarket_tw": 8,
-    "premarket_us": 9,
-}
+# Routine-type detection was removed: the SessionStart payload carries no user
+# prompt (session_id / transcript_path / cwd / hook_event_name / source only),
+# so detection always fell through to the default. All routines now share one
+# limit; per-routine discipline lives in each routine prompt instead.
 
 
 def main():
     try:
-        hook_input = json.loads(sys.stdin.read())
+        json.loads(sys.stdin.read())
     except (json.JSONDecodeError, EOFError):
-        hook_input = {}
+        pass
 
-    # Try to detect routine type from the session prompt
-    prompt = str(hook_input.get("prompt", ""))
-
-    if "盤前" in prompt and "台股" in prompt and "美股" not in prompt:
-        limit = LIMITS["premarket_tw"]
-    elif "盤後" in prompt:
-        limit = LIMITS["postmarket_tw"]
-    elif "美股" in prompt or "MAG 7" in prompt:
-        limit = LIMITS["premarket_us"]
-    else:
-        limit = 8  # default
-
-    counter = {"count": 0, "limit": limit}
+    counter = {"count": 0, "limit": SEARCH_LIMIT}
     with open(COUNTER_FILE, "w") as f:
         json.dump(counter, f)
+
+    try:
+        os.remove(FACTS_FILE)
+    except FileNotFoundError:
+        pass
 
     sys.exit(0)
 

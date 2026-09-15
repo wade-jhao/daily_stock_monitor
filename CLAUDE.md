@@ -172,7 +172,7 @@ These URLs consistently return 403 errors. Do NOT waste search quota on them:
 2. **嚴禁使用模糊數字** - 不寫「31.X」「YY.X 元」「~平盤」，要嘛精確要嘛省略
 3. **嚴禁編造籌碼數據** - 券商分點、借券、融資融券無確認來源就不寫
 4. **嚴禁 WebFetch 已知封鎖網站** - 參見上方 Known Blocked URLs
-5. **嚴禁超出 Web Search 次數上限** - 盤前 7 次、盤後 8 次、美股 9 次
+5. **嚴禁超出 Web Search 次數上限** - 三個 routine 一律 9 次
 6. **嚴禁股票代碼錯誤** - 必須參照本文件代碼表，特別注意群聯(8299)≠南電(8046)
 
 ## Content Quality Guidelines
