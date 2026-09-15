@@ -9,6 +9,9 @@ import json
 import sys
 import re
 
+FACTS_FILE = "/tmp/claude_report_facts.json"
+DEDUP_THRESHOLD = 5
+
 
 def validate_message(message: str) -> tuple[list[str], list[str]]:
     """Validate a Slack message. Returns (hard_issues, soft_issues).
@@ -120,6 +123,41 @@ def validate_message(message: str) -> tuple[list[str], list[str]]:
     return hard, soft
 
 
+def _fact_tokens(message: str) -> set[str]:
+    """Numeric tokens that identify a concrete fact (prices, changes, amounts)."""
+    toks: set[str] = set()
+    toks |= set(re.findall(r"[-+]?\d[\d,]*\.\d+%", message))     # -5.9%
+    toks |= set(re.findall(r"\d{1,3}(?:,\d{3})+", message))       # 45,862
+    toks |= set(re.findall(r"\$\d[\d,]*(?:\.\d+)?", message))     # $140
+    return toks
+
+
+def check_duplication(message: str) -> list[str]:
+    """Warn when this message restates facts already sent earlier this session."""
+    toks = _fact_tokens(message)
+    try:
+        with open(FACTS_FILE) as f:
+            seen = set(json.load(f).get("tokens", []))
+    except (FileNotFoundError, json.JSONDecodeError):
+        seen = set()
+
+    issues = []
+    overlap = toks & seen
+    if len(overlap) >= DEDUP_THRESHOLD:
+        sample = "、".join(sorted(overlap)[:6])
+        issues.append(
+            f"跨則重複：本則有 {len(overlap)} 個數值與前則重複（{sample}…）；"
+            "同一事實請只完整敘述一次，其餘則以 15 字內指涉"
+        )
+
+    try:
+        with open(FACTS_FILE, "w") as f:
+            json.dump({"tokens": sorted(seen | toks)}, f)
+    except OSError:
+        pass
+    return issues
+
+
 def main():
     try:
         hook_input = json.loads(sys.stdin.read())
@@ -136,6 +174,10 @@ def main():
         sys.exit(0)
 
     hard, soft = validate_message(message)
+    if not hard:
+        # Messages blocked by a hard gate are never sent, so they must not
+        # pollute the "already seen facts" ledger.
+        soft += check_duplication(message)
 
     if hard:
         # Hard issues: BLOCK sending

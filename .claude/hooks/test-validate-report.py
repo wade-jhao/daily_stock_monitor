@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Self-test for validate-report.py. Run: python3 .claude/hooks/test-validate-report.py"""
 import importlib.util
+import os
 import pathlib
 import sys
 
@@ -29,6 +30,52 @@ CASES = [
 ]
 
 
+# 跨則去重案例：(name, message, expect_warning)
+DEDUP_CASES = [
+    (
+        "去重-第1則無警告",
+        "加權指數 45,862 收黑 -0.70%；成交 3,210 億元。"
+        "台積電 +1.25%，NVDA $140.50，TSM ADR $433.00。",
+        False,
+    ),
+    (
+        "去重-第2則重複5項應警告",
+        "延續前述：加權指數 45,862（-0.70%）、成交 3,210 億元，"
+        "台積電 +1.25%，NVDA 報 $140.50。",
+        True,
+    ),
+    (
+        "去重-第3則僅重複1項不警告",
+        "加權指數 45,862 之外，本則聚焦櫃買 9,999 與外資期貨部位。",
+        False,
+    ),
+]
+
+
+def run_dedup():
+    """Cross-message dedup detection: warn only when >= DEDUP_THRESHOLD facts repeat."""
+    failed = 0
+    try:
+        os.remove(vr.FACTS_FILE)
+    except FileNotFoundError:
+        pass
+
+    for name, msg, want_warn in DEDUP_CASES:
+        issues = vr.check_duplication(msg)
+        got_warn = any("跨則重複" in i for i in issues)
+        if got_warn != want_warn:
+            failed += 1
+            print(f"FAIL {name}\n     issues={issues}")
+        else:
+            print(f"ok   {name}")
+
+    try:
+        os.remove(vr.FACTS_FILE)
+    except FileNotFoundError:
+        pass
+    return failed
+
+
 def run():
     failed = 0
     for name, msg, want_hard, want_soft in CASES:
@@ -39,7 +86,10 @@ def run():
             print(f"FAIL {name}\n     hard={hard}\n     soft={soft}")
         else:
             print(f"ok   {name}")
-    print(f"\n{len(CASES) - failed}/{len(CASES)} passed")
+
+    failed += run_dedup()
+    total = len(CASES) + len(DEDUP_CASES)
+    print(f"\n{total - failed}/{total} passed")
     return 1 if failed else 0
 
 
