@@ -48,6 +48,9 @@ def validate_message(message: str) -> tuple[list[str], list[str]]:
         (r"\d+\s*[點元億%]\s*左右", "數據使用「左右」"),
         (r"\d+\s*[點元億%]\s*附近", "數據使用「附近」"),
         (r"接近\s*\d+\s*[點元億%]", "數據使用「接近」"),
+        (r"約\s*\$?[-+]?\d", "報價位使用「約」+ 數字"),
+        (r"[-+]?\d+(?:\.\d+)?%\s*[～~]\s*[-+]?\d+(?:\.\d+)?%", "報價位使用百分比區間（如 -0.5%～-0.6%）"),
+        (r"[：:]\s*小[漲跌]|微幅", "報價位使用「小漲/小跌/微幅」而非具體數字"),
     ]
     for pattern, desc in fuzzy_word_patterns:
         if re.search(pattern, message):
@@ -95,16 +98,14 @@ def validate_message(message: str) -> tuple[list[str], list[str]]:
         if pat in message:
             soft.append(f"投資建議用語：包含「{pat}」")
 
-    # 5. Wrong Slack format detection [SOFT]
-    if "**" in message:
-        soft.append("格式錯誤：使用了雙星號 **（應用單星號 *）")
-    if re.search(r"^#+\s", message, re.MULTILINE):
-        soft.append("格式錯誤：使用了 # 標題語法（Slack 不支援）")
+    # 5. Format validation — the Slack connector consumes STANDARD MARKDOWN
+    #    (**bold**, _italic_), NOT Slack mrkdwn. A lone *text* renders italic.
+    if re.search(r"(?<![*\w])\*(?!\*)[^*\n]{1,80}(?<!\*)\*(?![*\w])", message):
+        soft.append("格式錯誤：偵測到單星號 *文字*（會渲染成斜體）；粗體請用 **文字**")
+    if re.search(r"^#{1,6}\s", message, re.MULTILINE):
+        soft.append("格式提醒：本專案不使用 # 標題（connector 支援，但 Slack 字級跳動過大）")
     if "<b>" in message or "<br>" in message or "<p>" in message:
         soft.append("格式錯誤：使用了 HTML 標籤")
-    # 5b. Markdown link format (should be Slack format <URL|text>)
-    if re.search(r"\[.+?\]\(https?://.+?\)", message):
-        soft.append("格式錯誤：使用了 Markdown 連結 [text](url)（應用 <url|text>）")
 
     # 6. Self-calculated exchange rate detection [HARD]
     if "換算" in message and "匯率" in message:

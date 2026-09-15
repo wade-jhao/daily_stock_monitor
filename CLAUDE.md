@@ -199,11 +199,14 @@ These URLs consistently return 403 errors. Do NOT waste search quota on them:
 - 總執行時間上限：20 分鐘
 - 若接近 15 分鐘仍在搜尋，立即進入撰寫
 
-## Slack mrkdwn Format Reminder
+## Slack 訊息格式（標準 Markdown）
 
-- 粗體：`*文字*`（單星號）
+Slack connector 接受的是**標準 Markdown**，不是 Slack mrkdwn。
+
+- 粗體：`**文字**`（雙星號）— 單星號 `*文字*` 會渲染成斜體
 - 斜體：`_文字_`
 - 程式碼：`` `文字` ``
 - 列表：`•` 開頭
-- 連結：`<URL|顯示文字>`
-- 禁止：HTML 標籤、雙星號 `**`、`#` 標題語法
+- 連結：`[顯示文字](URL)`（`<URL|顯示文字>` 為既有可用寫法，不禁止但不推薦）
+- 表格：標準 Markdown pipe 表格；結構性 `|` 不可 escape，僅儲存格內的字面 `|` 寫成 `\|`
+- 禁止：HTML 標籤、`#`～`######` 標題（connector 支援，但 Slack 字級跳動過大）
