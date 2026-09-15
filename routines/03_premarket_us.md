@@ -50,18 +50,31 @@
 
 【第 0 步】執行 Bash 指令 `TZ=Asia/Taipei date '+%Y-%m-%d %H:%M %A'` 取得精確台灣時間與日期。
 
-【第 0.5 步：硬數據取得（期貨、核心個股）— 用搜尋摘要，不 WebFetch】
+【第 0.5 步：硬數據取得（WebFetch，不計搜尋次數）】
 
-⚠️ investing.com WebFetch 常回傳 403，禁止對其 WebFetch。期貨與美股個股報價一律改用 WebSearch
-   從結果摘要直接擷取（精確值通常直接出現，如 S&P 期貨 7,623.5、NVDA 盤前價）。
-   ✅ 讀搜尋摘要＝合法取數。此步驟的數值經跨搜尋交叉確認後即為 ground truth。
+⟹ 讀取 .claude/skills/data-sources.md 取得端點清單、共通取數指令與回退規則。
 
-此步驟的硬數據併入第 1 步前兩次搜尋取得，不另計次數：
-- 道瓊/標普/那指期貨 → 由 Search 1 摘要擷取
-- NVDA、TSLA 盤前價與漲跌幅 → 由 Search 2 摘要擷取
+此步驟取得的數據為 ground truth，後續搜尋結果若與此矛盾，以此為準。
+每個 WebFetch 的 prompt 都必須帶上共通取數指令：
+「原樣回報數值，不得換算、不得四捨五入、不得推估。若頁面無該欄位，回答 NOT_FOUND。」
+
+取數項目（Yahoo chart API，`.../chart/{SYMBOL}?range=2d&interval=1d`）：
+- 期貨：`YM=F`（道瓊）、`ES=F`（標普）、`NQ=F`（那指）
+- 指標：`%5ESOX`（費半）、`%5EVIX`（VIX）、`DX-Y.NYB`（美元指數）
+- 個股／ETF：`NVDA`、`TSLA`、`TSM`、`QQQ`、`VOO`
+
+取值欄位：`regularMarketPrice`、`chartPreviousClose`（盤前價若有 `preMarketPrice` 一併取）。
+漲跌幅 = (regularMarketPrice − chartPreviousClose) / chartPreviousClose，屬算術，非「自行推算」。
+
+⚠️ investing.com 禁止 WebFetch（必 403）。
+
+⚠️ 回退註記（強制）：任一端點失敗或回 NOT_FOUND → 改用 WebSearch 從結果摘要擷取
+   （搜「S&P Nasdaq Dow futures today」、「NVDA premarket」等，精確值通常直接出現），
+   並在第 3 則末行「資料來源」欄註記，例：`_本日期貨報價改由搜尋摘要取得_`。
+   ✅ 讀搜尋摘要＝合法取數。端點失敗不中斷流程、不列硬門檻。
 
 19:30 台灣時間 = 美東約 07:30，盤前交易已開始，上述報價可取得。
-後續搜尋若出現不同數字，以最先取得且跨來源一致者為準。
+後續搜尋若出現不同數字，以第 0.5 步取得者為準。
 
 【第 0.3 步：讀取今日台股盤後報告（記憶層）— 不計入搜尋次數或執行時間】
 

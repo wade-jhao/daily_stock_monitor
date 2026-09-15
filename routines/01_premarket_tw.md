@@ -68,17 +68,33 @@
 執行 Bash 指令 `TZ=Asia/Taipei date '+%Y-%m-%d %H:%M %A'` 取得精確台灣時間與日期。
 本 routine 固定於台灣時間 08:30 觸發，用取得的日期判斷交易日與最新美股交易日。
 
-【第 0.5 步：硬數據取得（指數、匯率）— 不計入搜尋次數】
+【第 0.5 步：硬數據取得（WebFetch，不計搜尋次數）】
+
+⟹ 讀取 .claude/skills/data-sources.md 取得端點清單、共通取數指令與回退規則。
 
 此步驟取得的數據為 ground truth，後續搜尋結果若與此矛盾，以此為準。
+每個 WebFetch 的 prompt 都必須帶上共通取數指令：
+「原樣回報數值，不得換算、不得四捨五入、不得推估。若頁面無該欄位，回答 NOT_FOUND。」
 
-WebFetch 1（僅 cnyes，可正常存取）：`https://www.cnyes.com/twstock/`
-→ 擷取：加權指數最近交易日收盤價、漲跌幅、成交量、交易日期
-→ 若回傳 403/解析失敗，改用 WebSearch「台股加權指數 收盤 {前一交易日}」從結果摘要擷取。
+取數項目（皆走 Yahoo chart API，WebFetch）：
+1. 加權指數 `^TWII` → `.../chart/%5ETWII?range=5d&interval=1d`
+   → `regularMarketPrice`、`chartPreviousClose`、交易日期
+2. 櫃買指數 `^TWOII` → `.../chart/%5ETWOII?range=5d&interval=1d`
+3. USD/TWD → `.../chart/TWD=X?range=2d&interval=1d` → `regularMarketPrice`
+4. 費城半導體 `^SOX` → `.../chart/%5ESOX?range=5d&interval=1d`（隔夜美股傳導用）
 
-⚠️ USD/TWD 匯率：禁止 WebFetch investing.com（必 403）。改於第 1 步 Search 3 用 WebSearch
-   「USD TWD 美元 台幣 匯率」從結果摘要直接擷取即期匯率（通常出現精確數字，如 31.52）。
+漲跌幅 = (regularMarketPrice − chartPreviousClose) / chartPreviousClose。
+兩者皆為官方收盤價，相除屬算術，非「自行推算」。
+
+備援（僅在 Yahoo 失敗時）：`https://www.cnyes.com/twstock/`（WebFetch）
+→ 加權指數收盤、漲跌幅、交易日期；**成交值（億元）固定由此取得**（Yahoo chart 無此欄位）。
+
+⚠️ USD/TWD 匯率：禁止 WebFetch investing.com（必 403）。Yahoo `TWD=X` 失敗時，改於第 1 步
+   Search 3 用 WebSearch「USD TWD 美元 台幣 匯率」從結果摘要擷取即期匯率。
    ✅ 讀取搜尋結果摘要中的匯率＝合法取數；❌ 用 ADR 反推＝禁止行為。兩者不同，勿混淆。
+
+⚠️ 回退註記（強制）：任一端點失敗或回 NOT_FOUND → 走 WebSearch 路徑，並在第 3 則末行
+   「資料來源」欄註記，例：`_本日 USD/TWD 改由搜尋摘要取得_`。端點失敗不中斷流程、不列硬門檻。
 
 ⚠️ 日期驗證（強制）：取得的交易日期應為前一交易日（08:30 盤前尚未開盤）。
 

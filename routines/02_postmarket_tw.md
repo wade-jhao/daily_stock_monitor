@@ -86,17 +86,38 @@
 執行 Bash 指令 `TZ=Asia/Taipei date '+%Y-%m-%d %H:%M %A'` 取得精確台灣時間與日期。
 本 routine 固定於台灣時間 18:30 觸發，此時盤後數據已全數公布，直接使用當日資料。
 
-【第 0.5 步：硬數據取得（指數、匯率）— 不計入搜尋次數】
+【第 0.5 步：硬數據取得（WebFetch，不計搜尋次數）】
+
+⟹ 讀取 .claude/skills/data-sources.md 取得端點清單、共通取數指令與回退規則。
 
 此步驟取得的數據為 ground truth，後續搜尋結果若與此矛盾，以此為準。
+每個 WebFetch 的 prompt 都必須帶上共通取數指令：
+「原樣回報數值，不得換算、不得四捨五入、不得推估。若頁面無該欄位，回答 NOT_FOUND。」
 
-WebFetch 1（僅 cnyes，可正常存取）：`https://www.cnyes.com/twstock/`
-→ 擷取：加權指數收盤價、漲跌幅、成交量、交易日期
-→ 若回傳 403/解析失敗，改用 WebSearch「台股收盤 加權指數 {今日日期}」從結果摘要擷取。
+取數項目：
+1. 加權指數 `^TWII` → `.../chart/%5ETWII?range=5d&interval=1d`
+   → `regularMarketPrice`、`chartPreviousClose`、交易日期
+2. 櫃買指數 `^TWOII` → `.../chart/%5ETWOII?range=5d&interval=1d`
+3. USD/TWD → `.../chart/TWD=X?range=2d&interval=1d` → `regularMarketPrice`
+4. 費城半導體 `^SOX` → `.../chart/%5ESOX?range=5d&interval=1d`
+5. **外資台指期** → WebFetch `https://www.taifex.com.tw/cht/3/futContractsDate`
+   → 臺股期貨 → 外資及陸資 → **未平倉多空淨額口數** → 記為 `GT_FUT_FOREIGN`
+   （正 = 淨多單、負 = 淨空單；報告中的外資期貨方向必須與此正負一致）
+6. **美股期貨** `YM=F`/`ES=F`/`NQ=F` → `.../chart/{SYMBOL}?range=2d&interval=1d`
+   → 供第 3 則「夜盤聯動」使用
 
-⚠️ USD/TWD 匯率與美股期貨：禁止 WebFetch investing.com（必 403）。改用 WebSearch 從結果摘要直接擷取
-   （搜「USD TWD 匯率」、「S&P Nasdaq Dow futures today」通常回傳精確值）。
+漲跌幅 = (regularMarketPrice − chartPreviousClose) / chartPreviousClose。
+兩者皆為官方收盤價，相除屬算術，非「自行推算」。
+
+備援（僅在 Yahoo 失敗時）：`https://www.cnyes.com/twstock/`（WebFetch）
+→ 加權指數收盤、漲跌幅、交易日期；**成交值（億元）固定由此取得**（Yahoo chart 無此欄位）。
+
+⚠️ 禁止 WebFetch investing.com（必 403）。Yahoo/TAIFEX 失敗時改用 WebSearch 從結果摘要擷取
+   （搜「USD TWD 匯率」、「S&P Nasdaq Dow futures today」、「外資 台指期 未平倉」）。
    ✅ 讀搜尋摘要＝合法取數；❌ ADR 反推＝禁止行為。
+
+⚠️ 回退註記（強制）：任一端點失敗或回 NOT_FOUND → 走 WebSearch 路徑，並在第 3 則末行
+   「資料來源」欄註記，例：`_本日外資期貨改由媒體彙整_`。端點失敗不中斷流程、不列硬門檻。
 
 ⚠️ 日期驗證（強制）：取得的交易日期必須 = 第 0 步今日日期；不吻合則於報告標註實際數據日期。
 
