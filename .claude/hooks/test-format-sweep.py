@@ -33,6 +33,8 @@ TARGETS = [
 # A line teaching the rule is allowed to show the wrong form as an example.
 ALLOW_MARKERS = ("會渲染成斜體", "會變斜體")
 
+ASCII_PUNCT = ")]}>\"'.,;:!?%"
+BOLD_SPAN = re.compile(r"\*\*([^*\n]+)\*\*")
 LONE_STAR = re.compile(r"(?<![*\w])\*(?!\*)[^*\n]{1,80}(?<!\*)\*(?![*\w])")
 OVER_STAR = re.compile(r"\*{3,}")
 TABLE_ROW = re.compile(r"^\s*\|.*\|\s*$")
@@ -74,8 +76,36 @@ def scan_table_placement() -> list[str]:
     return issues
 
 
+def scan_broken_bold() -> list[str]:
+    """Bold ending in ASCII punctuation followed by a full-width char never renders.
+
+    CommonMark right-flanking: a closing ** preceded by ASCII punctuation and
+    followed by a non-ASCII character is not a valid closing delimiter, so the
+    asterisks survive verbatim in the message (verified end-to-end 2026-09-16,
+    7 controlled cases). Safe form: move the code out — **台積電**(2330).
+    """
+    issues = []
+    for rel in TARGETS:
+        p = ROOT / rel
+        if not p.exists():
+            continue
+        for i, line in enumerate(p.read_text().splitlines(), 1):
+            if any(m in line for m in ALLOW_MARKERS):
+                continue
+            for m in BOLD_SPAN.finditer(line):
+                if m.group(1)[-1] not in ASCII_PUNCT:
+                    continue
+                nxt = line[m.end():m.end() + 1]
+                if nxt and not nxt.isspace() and ord(nxt) > 127:
+                    issues.append(
+                        f"{rel}:{i}: 粗體收尾為半形標點且緊接全形字元，不會渲染 "
+                        f"{m.group(0)[:36]} → 改寫為 **名稱**(代號)"
+                    )
+    return issues
+
+
 def main() -> int:
-    issues = scan_lone_stars() + scan_table_placement()
+    issues = scan_lone_stars() + scan_table_placement() + scan_broken_bold()
     for x in issues:
         print(f"FAIL {x}")
     print(f"\n{len(issues)} issue(s)")

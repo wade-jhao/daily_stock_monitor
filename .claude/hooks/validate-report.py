@@ -110,6 +110,20 @@ def validate_message(message: str) -> tuple[list[str], list[str]]:
     if "<b>" in message or "<br>" in message or "<p>" in message:
         soft.append("格式錯誤：使用了 HTML 標籤")
 
+    # 5b. Bold ending in ASCII punctuation followed by a full-width character
+    #     never renders: CommonMark right-flanking rejects that closing **, so
+    #     the asterisks survive verbatim (verified end-to-end 2026-09-16).
+    #     Safe form: move the code out of the bold — **台積電**(2330).
+    for m in re.finditer(r"\*\*([^*\n]+)\*\*", message):
+        if m.group(1)[-1] in ")]}>\"'.,;:!?%":
+            nxt = message[m.end():m.end() + 1]
+            if nxt and not nxt.isspace() and ord(nxt) > 127:
+                soft.append(
+                    f"格式錯誤：粗體 {m.group(0)[:24]} 以半形標點收尾又緊接全形字元，"
+                    "星號會原樣外露；請改寫為 **名稱**(代號)"
+                )
+                break
+
     # 6. Self-calculated exchange rate detection [HARD]
     if "換算" in message and "匯率" in message:
         hard.append("匯率可能為自行推算（偵測到「換算」+「匯率」）")
