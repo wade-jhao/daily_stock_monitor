@@ -22,7 +22,7 @@ Yahoo chart API 路徑統一為
 |---|---|---|---|
 | 加權指數 | `https://query1.finance.yahoo.com/v8/finance/chart/%5ETWII?range=5d&interval=1d` | `regularMarketPrice`、`chartPreviousClose` | ✅ 已實測（WebFetch） |
 | USD/TWD | `https://query1.finance.yahoo.com/v8/finance/chart/TWD=X?range=2d&interval=1d` | `regularMarketPrice` | ✅ 已實測（WebFetch） |
-| 外資台指期 | `https://www.taifex.com.tw/cht/3/futContractsDate` | 臺股期貨 → 外資及陸資 → 未平倉多空淨額口數 | ✅ 已實測（curl 200） |
+| 外資台指期 | `https://www.taifex.com.tw/cht/3/futContractsDate` | 臺股期貨 → 外資及陸資 → 未平倉多空淨額口數 | ✅ 已實測（WebFetch） |
 | 櫃買指數 | `.../chart/%5ETWOII` | 同加權 | ✅ 已實測（WebFetch，269.45 / 267.72） |
 | 美股期貨 | `.../chart/ES=F`、`NQ=F`、`YM=F` | 同上 | ✅ `ES=F` 已實測（7668.5 / 7625.0）；`NQ=F`/`YM=F` 同類推定 |
 | 費城半導體 | `.../chart/%5ESOX` | 同上 | ✅ 已實測（11131.281 / 11614.17） |

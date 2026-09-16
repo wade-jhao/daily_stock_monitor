@@ -100,7 +100,7 @@
 ═══════════════════════════════════════
 【Ground Truth 驗證指令】
 ⟹ 讀取 .claude/skills/ground-truth-us.md 並遵循其中的 GT 登記表建立和硬/軟門檻驗證流程。
-   第 0.5 步硬數據（期貨/個股，WebSearch 摘要取得並跨搜尋交叉確認）為 ground truth。硬門檻未過禁止發送。
+   第 0.5 步硬數據（期貨/費半/VIX/DXY/個股 由 Yahoo chart API WebFetch 取得）為 ground truth。硬門檻未過禁止發送。
 ═══════════════════════════════════════
 
 【第 1 步：搜尋（9 次硬上限）】

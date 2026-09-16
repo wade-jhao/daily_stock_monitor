@@ -29,7 +29,9 @@ def main():
 
     try:
         os.remove(FACTS_FILE)
-    except FileNotFoundError:
+    except OSError:
+        # Broad: a bookkeeping failure must not crash SessionStart for
+        # the whole routine.
         pass
 
     sys.exit(0)

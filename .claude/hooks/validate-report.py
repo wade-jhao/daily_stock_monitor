@@ -103,7 +103,10 @@ def validate_message(message: str) -> tuple[list[str], list[str]]:
 
     # 5. Format validation — the Slack connector consumes STANDARD MARKDOWN
     #    (**bold**, _italic_), NOT Slack mrkdwn. A lone *text* renders italic.
-    if re.search(r"(?<![*\w])\*(?!\*)[^*\n]{1,80}(?<!\*)\*(?![*\w])", message):
+    # NOTE: the word-boundary guards use an ASCII-only class, never \w — in
+    # Python \w matches CJK ideographs, which made "這是*重點*說明" invisible to
+    # this very check. The guards exist only to avoid matching a*b*c / 2*3*4.
+    if re.search(r"(?<![*A-Za-z0-9_])\*(?!\*)[^*\n]{1,80}(?<!\*)\*(?![*A-Za-z0-9_])", message):
         soft.append("格式錯誤：偵測到單星號 *文字*（會渲染成斜體）；粗體請用 **文字**")
     if re.search(r"^#{1,6}\s", message, re.MULTILINE):
         soft.append("格式提醒：本專案不使用 # 標題（connector 支援，但 Slack 字級跳動過大）")
@@ -114,15 +117,19 @@ def validate_message(message: str) -> tuple[list[str], list[str]]:
     #     never renders: CommonMark right-flanking rejects that closing **, so
     #     the asterisks survive verbatim (verified end-to-end 2026-09-16).
     #     Safe form: move the code out of the bold — **台積電**(2330).
+    broken_bold = []
     for m in re.finditer(r"\*\*([^*\n]+)\*\*", message):
         if m.group(1)[-1] in ")]}>\"'.,;:!?%":
             nxt = message[m.end():m.end() + 1]
             if nxt and not nxt.isspace() and ord(nxt) > 127:
-                soft.append(
-                    f"格式錯誤：粗體 {m.group(0)[:24]} 以半形標點收尾又緊接全形字元，"
-                    "星號會原樣外露；請改寫為 **名稱**(代號)"
-                )
-                break
+                broken_bold.append(m.group(0)[:24])
+    if broken_bold:
+        sample = "、".join(broken_bold[:3])
+        more = f"…等 {len(broken_bold)} 處" if len(broken_bold) > 3 else ""
+        soft.append(
+            f"格式錯誤：粗體 {sample}{more} 以半形標點收尾又緊接全形字元，"
+            "星號會原樣外露；請改寫為 **名稱**(代號)"
+        )
 
     # 6. Self-calculated exchange rate detection [HARD]
     if "換算" in message and "匯率" in message:
@@ -152,7 +159,10 @@ def check_duplication(message: str) -> list[str]:
     try:
         with open(FACTS_FILE) as f:
             seen = set(json.load(f).get("tokens", []))
-    except (FileNotFoundError, json.JSONDecodeError):
+    except (OSError, json.JSONDecodeError, ValueError):
+        # Broad on purpose, matching the write path below: this hook runs on
+        # every send, so a dedup bookkeeping failure must never crash the
+        # quality gate and let an unvalidated message through.
         seen = set()
 
     issues = []

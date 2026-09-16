@@ -132,7 +132,7 @@
 ═══════════════════════════════════════
 【Ground Truth 驗證指令】
 ⟹ 讀取 .claude/skills/ground-truth-tw.md 並遵循其中的 GT 登記表建立和硬/軟門檻驗證流程。
-   第 0.5 步硬數據為 ground truth（指數 cnyes WebFetch、匯率 WebSearch 摘要），其餘搜尋數據須交叉比對。硬門檻未過禁止發送。
+   第 0.5 步硬數據為 ground truth（加權/櫃買/匯率/費半 由 Yahoo chart API WebFetch 取得；cnyes 為備援與成交值來源），其餘搜尋數據須交叉比對。硬門檻未過禁止發送。
 ═══════════════════════════════════════
 
 【第 1 步：依序搜尋（9 次硬上限）】

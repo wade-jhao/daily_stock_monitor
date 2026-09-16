@@ -36,7 +36,10 @@ ALLOW_MARKERS = ("會渲染成斜體", "會變斜體")
 ASCII_PUNCT = ")]}>\"'.,;:!?%"
 BOLD_SPAN = re.compile(r"\*\*([^*\n]+)\*\*")
 PLACEHOLDER_ONLY = re.compile(r"\[[^\]]*\]")
-LONE_STAR = re.compile(r"(?<![*\w])\*(?!\*)[^*\n]{1,80}(?<!\*)\*(?![*\w])")
+# ASCII-only boundary guards, never \w: in Python \w matches CJK ideographs,
+# which would hide "這是*重點*說明" from this check. The guards exist only to
+# avoid matching a*b*c / 2*3*4.
+LONE_STAR = re.compile(r"(?<![*A-Za-z0-9_])\*(?!\*)[^*\n]{1,80}(?<!\*)\*(?![*A-Za-z0-9_])")
 OVER_STAR = re.compile(r"\*{3,}")
 TABLE_ROW = re.compile(r"^\s*\|.*\|\s*$")
 MSG_MARKER = re.compile(r"【第\s*([0-9])\s*則")
