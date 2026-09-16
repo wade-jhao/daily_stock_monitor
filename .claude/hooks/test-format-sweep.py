@@ -35,6 +35,7 @@ ALLOW_MARKERS = ("會渲染成斜體", "會變斜體")
 
 ASCII_PUNCT = ")]}>\"'.,;:!?%"
 BOLD_SPAN = re.compile(r"\*\*([^*\n]+)\*\*")
+PLACEHOLDER_ONLY = re.compile(r"\[[^\]]*\]")
 LONE_STAR = re.compile(r"(?<![*\w])\*(?!\*)[^*\n]{1,80}(?<!\*)\*(?![*\w])")
 OVER_STAR = re.compile(r"\*{3,}")
 TABLE_ROW = re.compile(r"^\s*\|.*\|\s*$")
@@ -93,7 +94,15 @@ def scan_broken_bold() -> list[str]:
             if any(m in line for m in ALLOW_MARKERS):
                 continue
             for m in BOLD_SPAN.finditer(line):
-                if m.group(1)[-1] not in ASCII_PUNCT:
+                content = m.group(1)
+                # A bold span that is ENTIRELY one [placeholder] is a template
+                # slot: the model substitutes real text (**[族群]** → **航運**),
+                # so the rendered bold never ends in ASCII punctuation. Only the
+                # template scanner skips these — validate-report.py, which sees
+                # the real outgoing message, deliberately does NOT whitelist.
+                if PLACEHOLDER_ONLY.fullmatch(content):
+                    continue
+                if content[-1] not in ASCII_PUNCT:
                     continue
                 nxt = line[m.end():m.end() + 1]
                 if nxt and not nxt.isspace() and ord(nxt) > 127:

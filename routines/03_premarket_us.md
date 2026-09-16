@@ -231,13 +231,13 @@ _下一則：MAG 7 + 半導體 + 台股傳導_
 
 **━━ AI 互連/光通訊（高速連結，🔥當紅主軸）━━**
 
-🔌 **CRDO (Credo)** 🔥：±X.XX% ($XXX)
+🔌 **CRDO**(Credo) 🔥：±X.XX% ($XXX)
 - 動向：[SerDes/AEC 主動電纜/GPU 互連，2026 YTD 大幅領先] | 台股連動：連接器 嘉澤(3533)/光通訊 上詮(3363)
-🔌 **ALAB (Astera Labs)** 🔥：±X.XX% ($XXX)
+🔌 **ALAB**(Astera Labs) 🔥：±X.XX% ($XXX)
 - 動向：[PCIe/CXL/光互連 retimer/Scorpio fabric switch] | 台股連動：載板 欣興(3037)
-💡 **COHR (Coherent)**：±X.XX% ($XXX)
+💡 **COHR**(Coherent)：±X.XX% ($XXX)
 - 動向：[雷射/光收發模組/NVDA 入股] | 台股連動：聯亞(3081)/聯鈞(3450)/華星光(4979)
-💡 **LITE (Lumentum)**：±X.XX% ($XXX)
+💡 **LITE**(Lumentum)：±X.XX% ($XXX)
 - 動向：[資料中心雷射/光模組/NVDA 入股] | 台股連動：光通訊/CPO 鏈
 
 （僅列出有顯著動態的個股，無動態可整段省略）
@@ -253,63 +253,63 @@ LRCX、KLAC、CDNS、ASML、ADI 等有顯著動態時簡述
 🖥️ **HPE**：±X.XX% ($XX)
 - 動向：[ProLiant/網路設備] | 台股連動：緯創(3231)/英業達(2356)
 
-🌐 **ANET (Arista)**：±X.XX% ($XXX)
+🌐 **ANET**(Arista)：±X.XX% ($XXX)
 - 動向：[AI 資料中心網路/400G-800G 交換器] | 台股連動：智邦(2345)
 
-☁️ **ORCL (Oracle)** 🔥：±X.XX% ($XXX)
+☁️ **ORCL**(Oracle) 🔥：±X.XX% ($XXX)
 - 動向：[OCI 雲端/RPO backlog 積壓訂單/FY26 capex] | 台股連動：伺服器代工 鴻海(2317)/廣達(2382)
-⛅ **CRWV (CoreWeave)** 🔥：±X.XX% ($XXX)
+⛅ **CRWV**(CoreWeave) 🔥：±X.XX% ($XXX)
 - 動向：[GPU 雲/Neocloud/backlog/電力擴張/Meta 大單] | 台股連動：AI 伺服器/散熱/光通訊鏈
-⛅ **NBIS (Nebius)**：±X.XX% ($XXX)
+⛅ **NBIS**(Nebius)：±X.XX% ($XXX)
 - 動向：[GPU 雲/歐洲 Neocloud/營收高成長]
 
 （僅列出有顯著動態的個股，無動態可整段省略）
 
 **━━ AI 軟體/廣告平台 ━━**
 
-🤖 **APP (AppLovin)**：±X.XX% ($XXX)
+🤖 **APP**(AppLovin)：±X.XX% ($XXX)
 - 動向：[Axon AI 廣告引擎/營收成長/利潤率]
 
-🤖 **PLTR (Palantir)**：±X.XX% ($XXX)
+🤖 **PLTR**(Palantir)：±X.XX% ($XXX)
 - 動向：[AIP 平台/政府+商業客戶/估值]
 
-🔒 **CRWD (CrowdStrike)**：±X.XX% ($XXX)
+🔒 **CRWD**(CrowdStrike)：±X.XX% ($XXX)
 - 動向：[Falcon/資安支出/AI 威脅偵測]
 
-☁️ **SNOW (Snowflake)**：±X.XX% ($XXX)
+☁️ **SNOW**(Snowflake)：±X.XX% ($XXX)
 - 動向：[雲端數據/AI workload]
 
 （僅列出有顯著動態的個股，無動態可省略）
 
 **━━ 核能/電力基礎設施（AI 資料中心用電）━━**
 
-⚡ **GEV (GE Vernova)**：±X.XX% ($X,XXX)
+⚡ **GEV**(GE Vernova)：±X.XX% ($X,XXX)
 - 動向：[電力設備/天然氣渦輪/電網]
 
-⚡ **VST (Vistra)**：±X.XX% ($XXX)
+⚡ **VST**(Vistra)：±X.XX% ($XXX)
 - 動向：[核電+天然氣/資料中心用電]
 
-⚡ **CEG (Constellation Energy)**：±X.XX% ($XXX)
+⚡ **CEG**(Constellation Energy)：±X.XX% ($XXX)
 - 動向：[核電/Meta 長約/AI 用電]
 
 ⚡ **OKLO**：±X.XX% ($XX)
 - 動向：[SMR 小型核反應堆/NRC 審核/Sam Altman]
 
-⚡ **VRT (Vertiv)**：±X.XX% ($XXX)
+⚡ **VRT**(Vertiv)：±X.XX% ($XXX)
 - 動向：[資料中心液冷/電源管理/AI 散熱] | 台股連動：雙鴻(3324)/奇鋐(3017)/高力(8996)
 
 （僅列出有顯著動態的個股，無動態可整段省略）
 
 **━━ 太空/低軌衛星（2026 新增）━━**
 
-🛰️ **SPCX (SpaceX)** 🔥：±X.XX% ($XXX)
+🛰️ **SPCX**(SpaceX) 🔥：±X.XX% ($XXX)
 - 動向：[2026/6/12 Nasdaq 掛牌、史上最大 IPO（發行價 $135、首日收 $160.95、市值逾 2 兆美元）/Starlink 擴張/Starship] | 台股連動：低軌衛星 昇達科(3491)/華通(2313)/啟碁(6285)/同欣電(6271)/兆赫(2485)/台揚(2314)
 
 （僅列出有顯著動態的個股，無動態可整段省略）
 
 **━━ 量子運算（有動態時列出）━━**
 
-🔬 **IONQ**：±X.XX% ($XX) | **QBTS (D-Wave)**：±X.XX% ($XX)
+🔬 **IONQ**：±X.XX% ($XX) | **QBTS**(D-Wave)：±X.XX% ($XX)
 若無顯著動態，整段省略。
 
 **━━ 平台經濟/加密（有動態時列出）━━**
