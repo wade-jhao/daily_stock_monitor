@@ -207,6 +207,8 @@ These URLs consistently return 403 errors. Do NOT waste search quota on them:
 Slack connector 接受的是**標準 Markdown**，不是 Slack mrkdwn。
 
 - 粗體：`**文字**`（雙星號）— 單星號 `*文字*` 會渲染成斜體
+- ⚠️ 粗體**不得以半形標點收尾後緊接全形字元**（`)` `]` `%` 等）—— 星號會原樣外露。
+  代號請放在粗體外：`**台積電**(2330)`、`**CRDO**(Credo)`。（2026-09-16 端對端實測）
 - 斜體：`_文字_`
 - 程式碼：`` `文字` ``
 - 列表：`•` 開頭
