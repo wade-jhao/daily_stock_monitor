@@ -17,12 +17,18 @@ BLOCKED_DOMAINS = [
     "fubon-ebrokerdj.fbs.com.tw",
 ]
 
+# openapi.twse.com.tw serves JSON and returns 200 (verified 2026-09-15);
+# only the www / rwd / mops paths 403 against WebFetch's user agent.
+ALLOWED_HOSTS = ["openapi.twse.com.tw"]
+
 
 def is_blocked(url: str) -> str | None:
     """Return the matched blocked domain, or None if allowed."""
     try:
         hostname = urlparse(url).hostname or ""
     except Exception:
+        return None
+    if hostname in ALLOWED_HOSTS:
         return None
     for domain in BLOCKED_DOMAINS:
         if hostname == domain or hostname.endswith("." + domain):

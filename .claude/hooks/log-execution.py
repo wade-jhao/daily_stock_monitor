@@ -20,12 +20,12 @@ def main():
 
     # Read search count
     search_count = 0
-    search_limit = 8
+    search_limit = 9
     try:
         with open(COUNTER_FILE, "r") as f:
             counter = json.load(f)
             search_count = counter.get("count", 0)
-            search_limit = counter.get("limit", 8)
+            search_limit = counter.get("limit", 9)
     except (FileNotFoundError, json.JSONDecodeError):
         pass
 

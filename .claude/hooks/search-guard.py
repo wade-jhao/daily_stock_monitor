@@ -8,7 +8,7 @@ import json
 import sys
 
 COUNTER_FILE = "/tmp/claude_search_counter.json"
-DEFAULT_LIMIT = 8
+DEFAULT_LIMIT = 9
 
 
 def get_counter() -> dict:

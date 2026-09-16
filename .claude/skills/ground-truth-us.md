@@ -7,13 +7,18 @@ description: 美股 routine 的 Ground Truth 驗證框架。期貨和核心個�
 
 ## GT 登記表
 
-第 0.5 步的硬數據為 ground truth（期貨/個股報價由 WebSearch 結果摘要擷取並跨搜尋交叉確認，
+第 0.5 步的硬數據為 ground truth（固定端點 WebFetch，⟹ 見 .claude/skills/data-sources.md；
 禁止 WebFetch investing.com）。撰寫每則訊息前，必須建立內部「GT 登記表」並逐項比對：
 
-- GT_FUTURES_DOW：道瓊期貨 = [Search 1 摘要]
-- GT_FUTURES_NQ：那指期貨 = [Search 1 摘要]
-- GT_NVDA：NVDA 盤前價 = [Search 2 摘要]
-- GT_TSLA：TSLA 盤前價 = [Search 2 摘要]
+- GT_FUTURES_DOW：道瓊期貨 = [Yahoo `chart/YM=F`]
+- GT_FUTURES_SPX：標普期貨 = [Yahoo `chart/ES=F`]
+- GT_FUTURES_NQ：那指期貨 = [Yahoo `chart/NQ=F`]
+- GT_SOX：費城半導體 = [Yahoo `chart/%5ESOX`]
+- GT_NVDA：NVDA 盤前價 = [Yahoo `chart/NVDA`]
+- GT_TSLA：TSLA 盤前價 = [Yahoo `chart/TSLA`]
+
+漲跌幅 = (regularMarketPrice − chartPreviousClose) / chartPreviousClose，屬算術，非「自行推算」。
+任一端點失敗或回 NOT_FOUND → 走 WebSearch 摘要回退並於第 3 則末行註記；**端點失敗不列硬門檻**。
 
 ## 🔴 硬門檻（任一不過 → 該則訊息禁止發送，改發品質警告）
 
@@ -32,9 +37,9 @@ description: 美股 routine 的 Ground Truth 驗證框架。期貨和核心個�
 ## 🔴 硬門檻觸發時的替代訊息
 
 ```
-⚠️ *品質檢查未通過*
+⚠️ **品質檢查未通過**
 本則報告因以下問題暫停發送：• [具體問題] • [GT 數據 vs 報告數據]
-_關鍵數據請直接查閱 investing.com_
+_關鍵數據請直接查閱 finance.yahoo.com_
 ```
 
 發送替代訊息後，嘗試修正問題並重新撰寫。修正後仍不過則保留替代訊息，繼續下一則。

@@ -9,6 +9,9 @@ import json
 import sys
 import re
 
+FACTS_FILE = "/tmp/claude_report_facts.json"
+DEDUP_THRESHOLD = 5
+
 
 def validate_message(message: str) -> tuple[list[str], list[str]]:
     """Validate a Slack message. Returns (hard_issues, soft_issues).
@@ -48,6 +51,9 @@ def validate_message(message: str) -> tuple[list[str], list[str]]:
         (r"\d+\s*[點元億%]\s*左右", "數據使用「左右」"),
         (r"\d+\s*[點元億%]\s*附近", "數據使用「附近」"),
         (r"接近\s*\d+\s*[點元億%]", "數據使用「接近」"),
+        (r"約\s*\$?[-+]?\d", "報價位使用「約」+ 數字"),
+        (r"[-+]?\d+(?:\.\d+)?%\s*[～~]\s*[-+]?\d+(?:\.\d+)?%", "報價位使用百分比區間（如 -0.5%～-0.6%）"),
+        (r"[：:]\s*小[漲跌]|微幅", "報價位使用「小漲/小跌/微幅」而非具體數字"),
     ]
     for pattern, desc in fuzzy_word_patterns:
         if re.search(pattern, message):
@@ -95,16 +101,35 @@ def validate_message(message: str) -> tuple[list[str], list[str]]:
         if pat in message:
             soft.append(f"投資建議用語：包含「{pat}」")
 
-    # 5. Wrong Slack format detection [SOFT]
-    if "**" in message:
-        soft.append("格式錯誤：使用了雙星號 **（應用單星號 *）")
-    if re.search(r"^#+\s", message, re.MULTILINE):
-        soft.append("格式錯誤：使用了 # 標題語法（Slack 不支援）")
+    # 5. Format validation — the Slack connector consumes STANDARD MARKDOWN
+    #    (**bold**, _italic_), NOT Slack mrkdwn. A lone *text* renders italic.
+    # NOTE: the word-boundary guards use an ASCII-only class, never \w — in
+    # Python \w matches CJK ideographs, which made "這是*重點*說明" invisible to
+    # this very check. The guards exist only to avoid matching a*b*c / 2*3*4.
+    if re.search(r"(?<![*A-Za-z0-9_])\*(?!\*)[^*\n]{1,80}(?<!\*)\*(?![*A-Za-z0-9_])", message):
+        soft.append("格式錯誤：偵測到單星號 *文字*（會渲染成斜體）；粗體請用 **文字**")
+    if re.search(r"^#{1,6}\s", message, re.MULTILINE):
+        soft.append("格式提醒：本專案不使用 # 標題（connector 支援，但 Slack 字級跳動過大）")
     if "<b>" in message or "<br>" in message or "<p>" in message:
         soft.append("格式錯誤：使用了 HTML 標籤")
-    # 5b. Markdown link format (should be Slack format <URL|text>)
-    if re.search(r"\[.+?\]\(https?://.+?\)", message):
-        soft.append("格式錯誤：使用了 Markdown 連結 [text](url)（應用 <url|text>）")
+
+    # 5b. Bold ending in ASCII punctuation followed by a full-width character
+    #     never renders: CommonMark right-flanking rejects that closing **, so
+    #     the asterisks survive verbatim (verified end-to-end 2026-09-16).
+    #     Safe form: move the code out of the bold — **台積電**(2330).
+    broken_bold = []
+    for m in re.finditer(r"\*\*([^*\n]+)\*\*", message):
+        if m.group(1)[-1] in ")]}>\"'.,;:!?%":
+            nxt = message[m.end():m.end() + 1]
+            if nxt and not nxt.isspace() and ord(nxt) > 127:
+                broken_bold.append(m.group(0)[:24])
+    if broken_bold:
+        sample = "、".join(broken_bold[:3])
+        more = f"…等 {len(broken_bold)} 處" if len(broken_bold) > 3 else ""
+        soft.append(
+            f"格式錯誤：粗體 {sample}{more} 以半形標點收尾又緊接全形字元，"
+            "星號會原樣外露；請改寫為 **名稱**(代號)"
+        )
 
     # 6. Self-calculated exchange rate detection [HARD]
     if "換算" in message and "匯率" in message:
@@ -117,6 +142,44 @@ def validate_message(message: str) -> tuple[list[str], list[str]]:
         soft.append(f"訊息過長：{len(message)} 字（上限 3500）")
 
     return hard, soft
+
+
+def _fact_tokens(message: str) -> set[str]:
+    """Numeric tokens that identify a concrete fact (prices, changes, amounts)."""
+    toks: set[str] = set()
+    toks |= set(re.findall(r"[-+]?\d[\d,]*\.\d+%", message))     # -5.9%
+    toks |= set(re.findall(r"\d{1,3}(?:,\d{3})+", message))       # 45,862
+    toks |= set(re.findall(r"\$\d[\d,]*(?:\.\d+)?", message))     # $140
+    return toks
+
+
+def check_duplication(message: str) -> list[str]:
+    """Warn when this message restates facts already sent earlier this session."""
+    toks = _fact_tokens(message)
+    try:
+        with open(FACTS_FILE) as f:
+            seen = set(json.load(f).get("tokens", []))
+    except (OSError, json.JSONDecodeError, ValueError):
+        # Broad on purpose, matching the write path below: this hook runs on
+        # every send, so a dedup bookkeeping failure must never crash the
+        # quality gate and let an unvalidated message through.
+        seen = set()
+
+    issues = []
+    overlap = toks & seen
+    if len(overlap) >= DEDUP_THRESHOLD:
+        sample = "、".join(sorted(overlap)[:6])
+        issues.append(
+            f"跨則重複：本則有 {len(overlap)} 個數值與前則重複（{sample}…）；"
+            "同一事實請只完整敘述一次，其餘則以 15 字內指涉"
+        )
+
+    try:
+        with open(FACTS_FILE, "w") as f:
+            json.dump({"tokens": sorted(seen | toks)}, f)
+    except OSError:
+        pass
+    return issues
 
 
 def main():
@@ -135,6 +198,10 @@ def main():
         sys.exit(0)
 
     hard, soft = validate_message(message)
+    if not hard:
+        # Messages blocked by a hard gate are never sent, so they must not
+        # pollute the "already seen facts" ledger.
+        soft += check_duplication(message)
 
     if hard:
         # Hard issues: BLOCK sending

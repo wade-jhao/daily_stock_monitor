@@ -7,13 +7,19 @@ description: 台股 routine（盤前/盤後）的 Ground Truth 驗證框架。We
 
 ## GT 登記表
 
-第 0.5 步取得的硬數據為 ground truth（指數優先 cnyes WebFetch；匯率改由 WebSearch 結果摘要擷取，
+第 0.5 步取得的硬數據為 ground truth（固定端點 WebFetch，⟹ 見 .claude/skills/data-sources.md；
 禁止 WebFetch investing.com）。撰寫每則訊息前，必須建立內部「GT 登記表」並逐項比對：
 
-- GT_INDEX：加權指數收盤 = [cnyes WebFetch 或搜尋摘要]
-- GT_CHANGE：漲跌幅 = [同上]
-- GT_FX：USD/TWD = [WebSearch 摘要擷取，非 ADR 反推]
+- GT_INDEX：加權指數收盤 = [Yahoo `^TWII` 的 `regularMarketPrice`；失敗時 cnyes WebFetch 備援]
+- GT_CHANGE：漲跌幅 = [(regularMarketPrice − chartPreviousClose) / chartPreviousClose，
+  兩者皆為官方收盤價，相除屬算術，非「自行推算」]
+- GT_OTC：櫃買指數收盤 = [Yahoo `^TWOII`，同上規則]
+- GT_FX：USD/TWD = [Yahoo `TWD=X` 的 `regularMarketPrice`；失敗時 WebSearch 摘要，非 ADR 反推]
+- GT_FUT_FOREIGN：外資台指期未平倉多空淨額口數 = [TAIFEX `futContractsDate`]（**盤後專用**，
+  正 = 淨多單、負 = 淨空單）
 - GT_DATE：數據日期 = [第 0.5 步日期]
+
+任一端點失敗或回 NOT_FOUND → 走 WebSearch 回退並於第 3 則末行註記來源；**端點失敗不列硬門檻**。
 
 ## 🔴 硬門檻（任一不過 → 該則訊息禁止發送，改發品質警告）
 
@@ -22,17 +28,19 @@ description: 台股 routine（盤前/盤後）的 Ground Truth 驗證框架。We
 3. 股票代碼不在代碼表中且無新聞來源確認 → BLOCK
 4. 關鍵數據位出現模糊數字（~、約、X）→ BLOCK
 5. 「即將舉行」事件未經時效校驗即引用 → BLOCK
+6. 外資期貨方向與 GT_FUT_FOREIGN 正負相反 → BLOCK（盤後；GT_FUT_FOREIGN 未取得時本條不適用）
 
 ## 🟡 軟門檻（記錄但繼續發送）
 
-6. 搜尋次數達上限
-7. 部分區段省略
-8. 事件時效無法確認（標註「待確認」即可）
+7. 搜尋次數達上限
+8. 部分區段省略
+9. 事件時效無法確認（標註「待確認」即可）
+10. 硬數據端點失敗改走 WebSearch（須於末行註記來源）
 
 ## 🔴 硬門檻觸發時的替代訊息
 
 ```
-⚠️ *品質檢查未通過*
+⚠️ **品質檢查未通過**
 本則報告因以下問題暫停發送：• [具體問題] • [GT 數據 vs 報告數據]
 _關鍵數據請直接查閱 cnyes.com_
 ```

@@ -67,13 +67,16 @@ These URLs consistently return 403 errors. Do NOT waste search quota on them:
 4. Yahoo 股市 tw.stock.yahoo.com
 
 ### 美股/國際數據
-⚠️ 期貨、指數、匯率、美股個股報價一律用 WebSearch 讀結果摘要（搜「S&P Nasdaq futures today」「NVDA premarket」通常直接回傳精確值）。investing.com WebFetch 常 403，勿直接抓頁。
-1. WebSearch 結果摘要（首選：期貨/指數/個股/匯率/原物料）
-2. CNBC、Yahoo Finance、MarketWatch（搜尋摘要中的報價）
+⚠️ 期貨、指數、美股個股報價**首選 WebFetch Yahoo chart API**（⟹ `.claude/skills/data-sources.md`），不計搜尋次數。
+1. Yahoo chart API（首選：`ES=F`/`NQ=F`/`YM=F`/`^SOX`/`^VIX`/`DX-Y.NYB`/個股代號）
+2. 回退：WebSearch 結果摘要（搜「S&P Nasdaq futures today」「NVDA premarket」通常直接回傳精確值）
+3. CNBC、Yahoo Finance、MarketWatch（搜尋摘要中的報價）
+⚠️ investing.com WebFetch 常 403，勿直接抓頁。Yahoo chart 只能用 WebFetch，勿用 Bash/curl（會被限流）。
 
 ### 台幣匯率
-1. WebSearch「台幣匯率」或「USD TWD」→ 從結果摘要擷取即期匯率（讀摘要≠自算匯率，合法）
-2. 鉅亨網外匯頁面（搜尋摘要）
+1. WebFetch Yahoo chart `TWD=X`（首選，不計搜尋次數）
+2. 回退：WebSearch「台幣匯率」或「USD TWD」→ 從結果摘要擷取即期匯率（讀摘要≠自算匯率，合法）
+3. 鉅亨網外匯頁面（搜尋摘要）
 ⚠️ investing.com 匯率頁勿 WebFetch（403）；禁止用 ADR 反推匯率
 
 ### 除權息/法說會
@@ -172,7 +175,7 @@ These URLs consistently return 403 errors. Do NOT waste search quota on them:
 2. **嚴禁使用模糊數字** - 不寫「31.X」「YY.X 元」「~平盤」，要嘛精確要嘛省略
 3. **嚴禁編造籌碼數據** - 券商分點、借券、融資融券無確認來源就不寫
 4. **嚴禁 WebFetch 已知封鎖網站** - 參見上方 Known Blocked URLs
-5. **嚴禁超出 Web Search 次數上限** - 盤前 7 次、盤後 8 次、美股 9 次
+5. **嚴禁超出 Web Search 次數上限** - 三個 routine 一律 9 次
 6. **嚴禁股票代碼錯誤** - 必須參照本文件代碼表，特別注意群聯(8299)≠南電(8046)
 
 ## Content Quality Guidelines
@@ -199,11 +202,18 @@ These URLs consistently return 403 errors. Do NOT waste search quota on them:
 - 總執行時間上限：20 分鐘
 - 若接近 15 分鐘仍在搜尋，立即進入撰寫
 
-## Slack mrkdwn Format Reminder
+## Slack 訊息格式（標準 Markdown）
 
-- 粗體：`*文字*`（單星號）
+Slack connector 接受的是**標準 Markdown**，不是 Slack mrkdwn。
+
+- 粗體：`**文字**`（雙星號）— 單星號 `*文字*` 會渲染成斜體
+- ⚠️ 粗體**不得以半形標點收尾後緊接全形字元**（`)` `]` `%` 等）—— 星號會原樣外露。
+  代號請放在粗體外：`**台積電**(2330)`、`**CRDO**(Credo)`。（2026-09-16 端對端實測）
 - 斜體：`_文字_`
 - 程式碼：`` `文字` ``
 - 列表：`•` 開頭
-- 連結：`<URL|顯示文字>`
-- 禁止：HTML 標籤、雙星號 `**`、`#` 標題語法
+- 連結：`[顯示文字](URL)`（`<URL|顯示文字>` 為既有可用寫法，不禁止但不推薦）
+- 表格：標準 Markdown pipe 表格；結構性 `|` 不可 escape，僅儲存格內的字面 `|` 寫成 `\|`
+  - ⚠️ 表格會視覺呈現，但**不進入可回讀的訊息文字**（2026-09-15 端對端實測）。
+    勿用於需要被下一個 routine 回讀的段落（第 0.3 步記憶層會看不到）。
+- 禁止：HTML 標籤、`#`～`######` 標題（connector 支援，但 Slack 字級跳動過大）
