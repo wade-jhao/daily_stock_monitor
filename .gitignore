@@ -2,7 +2,3 @@ execution-log.jsonl
 /tmp/
 *.pyc
 __pycache__/
-
-# 機器本地設定（含硬編絕對路徑），刻意不入版控
-AGENTS.md
-.codex/
